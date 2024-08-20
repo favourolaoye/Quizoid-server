@@ -1,39 +1,20 @@
-// const Exam = require('../models/Exam');
-
-// exports.createExam = async (req, res) => {
-//   const { title, description, startTime, endTime, questions } = req.body;
-
-//   try {
-//     const exam = new Exam({
-//       title,
-//       description,
-//       startTime,
-//       endTime,
-//       questions
-//     });
-
-//     await exam.save();
-//     res.status(201).json({ msg: 'Exam created successfully' });
-//   } catch (err) {
-//     console.error(err.message);
-//     res.status(500).send('Server error');
-//   }
-// };
+const ObjectiveExam = require('../models/ObjectiveModel');
+const TheoryExam = require("../models/TheoryModel");
+const { checkIfExamExist } = require('../utils/global');
 
 
-// controllers/examController.js
-const Exam = require('../models/Exam');
+
 
 const createExam = async (req, res) => {
   const { courseCode, instruction, type, questions, lecturerID } = req.body;
-  
+
   try {
-    const exists = await Exam.findOne({ courseCode });
+    const exists = await ObjectiveExam.findOne({ courseCode });
     if (exists) {
       return res.status(400).json({ message: 'Exam already exists for this course' });
     }
 
-    const newExam = new Exam({
+    const newExam = new ObjectiveExam({
       courseCode,
       instruction,
       type,
@@ -51,9 +32,9 @@ const createExam = async (req, res) => {
 
 const getExamsByCourse = async (req, res) => {
   const { courseCode } = req.params;
-  
+
   try {
-    const exams = await Exam.find({ courseCode });
+    const exams = await ObjectiveExam.find({ courseCode });
     res.status(200).json(exams);
   } catch (error) {
     console.error(error);
@@ -65,7 +46,7 @@ const getExamById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const exam = await Exam.findById(id);
+    const exam = await ObjectiveExam.findById(id);
     if (!exam) {
       return res.status(404).json({ message: 'Exam not found' });
     }
@@ -81,7 +62,7 @@ const updateExam = async (req, res) => {
   const { title, questions } = req.body;
 
   try {
-    const updatedExam = await Exam.findByIdAndUpdate(id, { title, questions }, { new: true });
+    const updatedExam = await ObjectiveExam.findByIdAndUpdate(id, { title, questions }, { new: true });
     if (!updatedExam) {
       return res.status(404).json({ message: 'Exam not found' });
     }
@@ -95,16 +76,16 @@ const updateExam = async (req, res) => {
 
 const deleteExam = async (req, res) => {
   const { courseCode } = req.params;
-  
+
   try {
-    const exam = await Exam.findOne({ courseCode });
+    const exam = await ObjectiveExam.findOne({ courseCode });
     if (exam) {
-      await Exam.deleteOne();  
+      await ObjectiveExam.deleteOne();
       res.status(200).json({ message: 'Exam deleted successfully' });
-    }else{
+    } else {
       return res.status(404).json({ message: 'Exam not found' });
     }
-    
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error });
@@ -113,13 +94,15 @@ const deleteExam = async (req, res) => {
 
 const checkExam = async (req, res) => {
   const { courseCode } = req.params;
-  
+
   try {
-    const exam = await Exam.findOne({ courseCode });
-    if (!exam) {
+    const examExists = await checkIfExamExist(courseCode);
+    if (examExists) {
+      res.status(200).json({ message: 'Exam already exists for this course' });
+    } else {
       return res.status(404).json({ message: 'Exam not found' });
     }
-    res.status(200).json({ message: 'Exam already exists for this course' });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error });
