@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const theoryExamSchema = new mongoose.Schema({
   courseCode: {
@@ -29,4 +29,4 @@ const theoryExamSchema = new mongoose.Schema({
 
 const Theory = mongoose.model('Theory', theoryExamSchema);
 
-module.exports = Theory;
+export default Theory;

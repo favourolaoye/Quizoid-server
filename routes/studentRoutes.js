@@ -1,16 +1,7 @@
-const express = require('express');
-const multer = require('multer');
-const studentController = require('../controllers/studentController');
-const router = express.Router();
+import express from 'express';
+import * as studentController from '../controllers/studentController.js'; // Ensure controller file uses .js extension
 
-// Multer configuration for handling multiple file uploads (max 10 files)
-const storage = multer.diskStorage({
-  destination: './uploads/faces/',
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-const upload = multer({ storage });
+const router = express.Router();
 
 // Register a new student
 router.post('/register', studentController.registerStudents);
@@ -24,10 +15,10 @@ router.post('/generate-link-all', studentController.generateLinksForAllStudents)
 // Route to get a list of up to 6 students
 router.get('/limited', studentController.getStudents);
 
-// Route to get details of a specific student by ID
-// router.get('/:id', studentController.getStudentDetails);
+// Verify face
+router.post('/verify-face', studentController.verifyFace);
 
-// Route for uploading face images for a specific student (multiple images allowed, max 10)
-router.post('/upload-face', upload.array('faceImages', 10), studentController.uploadFaceImage);
+// Route for uploading face images for a specific student (multiple images allowed)
+router.post('/upload-face', studentController.uploadFaceImage);
 
-module.exports = router;
+export default router;

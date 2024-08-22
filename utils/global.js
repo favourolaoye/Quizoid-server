@@ -1,19 +1,14 @@
-const ObjectiveExam = require('../models/ObjectiveModel');
-const TheoryExam = require("../models/TheoryModel");
-
+import ObjectiveExam from '../models/ObjectiveModel.js';
+import TheoryExam from '../models/TheoryModel.js';
 
 const checkIfExamExist = async (courseCode) => {
     const objExam = await ObjectiveExam.findOne({ courseCode });
     if (objExam) {
-        return true
+        return true;
     }
+
     const theoryExam = await TheoryExam.findOne({ courseCode });
-    if (theoryExam) {
-        return true
-    } else {
-        return false
-    }
-}
+    return theoryExam ? true : false;
+};
 
-
-module.exports = checkIfExamExist;
+export default checkIfExamExist;

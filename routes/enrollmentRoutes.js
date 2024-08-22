@@ -1,8 +1,9 @@
-const express = require('express');
-const enrollmentController = require('../controllers/enrollmentController');
+import express from 'express';
+import { enrollCourses } from '../controllers/enrollmentController.js';
+
 const router = express.Router();
 
 // Student: Enroll in Courses
-router.post('/enroll', enrollmentController.enrollCourses);
+router.post('/enroll', enrollCourses);
 
-module.exports = router;
+export default router;

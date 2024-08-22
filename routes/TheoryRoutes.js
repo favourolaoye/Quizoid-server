@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import auth from '../middleware/auth.js';
+import { createExam, getExamsByCourse, getExamById, updateExam, deleteExam, checkExam } from '../controllers/theoryController.js';
+
 const router = express.Router();
-const auth = require('../middleware/auth');
-const { createExam, getExamsByCourse, getExamById, updateExam, deleteExam, checkExam } = require('../controllers/theoryController');
 
 // Create a new exam
 router.post('/', auth, createExam);
@@ -22,4 +23,4 @@ router.delete('/:courseCode', auth, deleteExam);
 router.get('/check/:courseCode', auth, checkExam);
 // router.get('/check/:code', checkExam);
 
-module.exports = router;
+export default router;

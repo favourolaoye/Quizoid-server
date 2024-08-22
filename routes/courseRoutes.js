@@ -1,11 +1,12 @@
-const express = require('express');
-const courseController = require('../controllers/courseController');
+import express from 'express';
+import { uploadCourses, getCoursesForStudent } from '../controllers/courseController.js';
+
 const router = express.Router();
 
 // Admin: Upload Courses via CSV
-router.post('/upload', courseController.uploadCourses);
+router.post('/upload', uploadCourses);
 
 // Student: Get Courses by Department and Level
-router.get('/:studentId', courseController.getCoursesForStudent);
+router.get('/:studentId', getCoursesForStudent);
 
-module.exports = router;
+export default router;

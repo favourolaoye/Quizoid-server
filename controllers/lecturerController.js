@@ -1,10 +1,10 @@
-// controllers/lecturerController.js
-const bcrypt = require("bcryptjs");
-const jwt = require('jsonwebtoken');
-const Lecturer = require('../models/Lecturer');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import Lecturer from '../models/Lecturer.js';
+
 const secret = process.env.SECRET_ID;
 
-const addLecturer = async (req, res) => {
+export const addLecturer = async (req, res) => {
   const { name, lecturerID, password, department, courses } = req.body;
 
   try {
@@ -33,7 +33,7 @@ const addLecturer = async (req, res) => {
   }
 };
 
-const loginLecturer = async (req, res) => {
+export const loginLecturer = async (req, res) => {
   const { lecturerID, password } = req.body;
 
   try {
@@ -47,10 +47,6 @@ const loginLecturer = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-
-    // if( password !== lecturer.password ){
-    //   return res.status(400).json({ message: 'Invalid Password' });
-    // }
 
     const payload = {
       id: lecturer._id,
@@ -77,5 +73,3 @@ const loginLecturer = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
-
-module.exports = { addLecturer, loginLecturer };

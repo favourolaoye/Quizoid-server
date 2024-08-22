@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const enrollmentSchema = new mongoose.Schema({
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
@@ -6,5 +6,5 @@ const enrollmentSchema = new mongoose.Schema({
 });
 
 const Enrollment = mongoose.model('Enrollment', enrollmentSchema);
-module.exports = Enrollment;
+export default Enrollment;
  

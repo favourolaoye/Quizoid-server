@@ -1,9 +1,7 @@
-const Exam  = require('../models/TheoryModel');
-const checkIfExamExist = require('../utils/global');
+import Exam from '../models/TheoryModel.js';
+import checkIfExamExist from '../utils/global.js';
 
-
-
-const createExam = async (req, res) => {
+export const createExam = async (req, res) => {
   const { courseCode, instruction, type, questions, lecturerID } = req.body;
   
   try {
@@ -28,7 +26,7 @@ const createExam = async (req, res) => {
   }
 };
 
-const getExamsByCourse = async (req, res) => {
+export const getExamsByCourse = async (req, res) => {
   const { courseCode } = req.params;
   
   try {
@@ -40,7 +38,7 @@ const getExamsByCourse = async (req, res) => {
   }
 };
 
-const getExamById = async (req, res) => {
+export const getExamById = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -55,7 +53,7 @@ const getExamById = async (req, res) => {
   }
 };
 
-const updateExam = async (req, res) => {
+export const updateExam = async (req, res) => {
   const { id } = req.params;
   const { title, questions } = req.body;
 
@@ -71,26 +69,24 @@ const updateExam = async (req, res) => {
   }
 };
 
-
-const deleteExam = async (req, res) => {
+export const deleteExam = async (req, res) => {
   const { courseCode } = req.params;
   
   try {
     const exam = await Exam.findOne({ courseCode });
     if (exam) {
-      await Exam.deleteOne();  
+      await Exam.deleteOne({ courseCode });  
       res.status(200).json({ message: 'Exam deleted successfully' });
-    }else{
+    } else {
       return res.status(404).json({ message: 'Exam not found' });
     }
-    
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error });
   }
 };
 
-const checkExam = async (req, res) => {
+export const checkExam = async (req, res) => {
   const { courseCode } = req.params;
 
   try {
@@ -100,13 +96,8 @@ const checkExam = async (req, res) => {
     } else {
       return res.status(404).json({ message: 'Exam not found' });
     }
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error });
   }
 };
-
-
-
-module.exports = { createExam, getExamsByCourse, getExamById, updateExam, deleteExam, checkExam };

@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
 
 const AdminSchema = new mongoose.Schema({
   adminID: {
@@ -20,5 +19,4 @@ const AdminSchema = new mongoose.Schema({
    timestamps: true
 });
 
-
-module.exports = mongoose.model('Admin', AdminSchema);
+export default mongoose.model('Admin', AdminSchema);

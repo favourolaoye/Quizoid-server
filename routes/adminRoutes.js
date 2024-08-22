@@ -1,12 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const auth = require('../middleware/auth');
-const adminCheck = require('../middleware/adminCheck'); // the middleware that checks for admin role
-const { registerAdmin, loginAdmin } = require('../controllers/adminController');
+import express from 'express';
+// import auth from '../middleware/auth.js';
+// import adminCheck from '../middleware/adminCheck'; 
+import { registerAdmin, loginAdmin } from '../controllers/adminController.js';
 
+const router = express.Router();
+
+// Uncomment this line if you want to apply both auth and adminCheck middleware for registration
 // router.post('/register', auth, adminCheck, registerAdmin);
+
 router.post('/register', registerAdmin);
 
 router.post('/login', loginAdmin);
 
-module.exports = router;
+export default router;

@@ -1,7 +1,11 @@
-const jwt = require('jsonwebtoken');
-const secret = "6c8b0f32-9d45-4f77-a19b-9e35a96bca8a";
-require("dotenv").config();
-module.exports = function (req, res, next) {
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const secret = process.env.SECRET_ID; //
+
+export default function (req, res, next) {
   const token = req.header('x-auth-token');
   console.log('secret:', secret);
 
@@ -16,4 +20,4 @@ module.exports = function (req, res, next) {
   } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
   }
-};
+}

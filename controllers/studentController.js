@@ -1,14 +1,23 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const multer = require("multer");
-const Student = require('../models/Student');
-const mongoose = require('mongoose');
-const path = require('path')
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import Student from '../models/Student.js'; // Ensure model files use .js extension
+import sharp from 'sharp';
+import * as faceapi from 'face-api.js';
+import { fileURLToPath } from 'url';
+import canvas, { loadImage } from 'canvas';
+import path from 'path';
+// import fs from 'fs';
+
 const secret = "6c8b0f32-9d45-4f77-a19b-9e35a96bca8a";
 
+// const fetchBlob = async () => {
+//   const { Blob } = await import('fetch-blob');
+//   return Blob;
+// };
+
 // Register a new student
-const registerStudents = async (req, res) => {
+export const registerStudents = async (req, res) => {
   const students = req.body;
 
   // Check if students is an array
@@ -70,9 +79,8 @@ const registerStudents = async (req, res) => {
   });
 };
 
-
 // Login a student
-const loginStudent = async (req, res) => {
+export const loginStudent = async (req, res) => {
   const { matricNo, password } = req.body;
 
   try {
@@ -116,7 +124,7 @@ const loginStudent = async (req, res) => {
 };
 
 // Generate one-time link for uploading face image
-const generateLinksForAllStudents = async (req, res) => {
+export const generateLinksForAllStudents = async (req, res) => {
   try {
     const students = await Student.find();
 
@@ -149,7 +157,7 @@ const generateLinksForAllStudents = async (req, res) => {
 };
 
 // Function to get a list of up to 6 students
-const getStudents = async (req, res) => {
+export const getStudents = async (req, res) => {
   try {
     const students = await Student.find().limit(6); // Fetch 6 students from the database
     res.json(students);
@@ -158,33 +166,24 @@ const getStudents = async (req, res) => {
   }
 };
 
-//face uploading
-const storage = multer.diskStorage({
-  destination: './uploads/faces/',
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
+// Upload face images
+// Get the current file URL and derive __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Multer configuration
-const upload = multer({
-  storage,
-  limits: { fileSize: 1000000 }, // Limit to 1 MB
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
+// Initialize Canvas for face-api.js
+const { Canvas, Image, ImageData } = canvas;
+faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only images are allowed!'));
-    }
-  }
-});
+// Load the face-api.js models
+const MODELS_PATH = path.join(__dirname, 'trainers');
+await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODELS_PATH);
+await faceapi.nets.faceLandmark68Net.loadFromDisk(MODELS_PATH);
+await faceapi.nets.faceRecognitionNet.loadFromDisk(MODELS_PATH);
 
-// Controller function
-const uploadFaceImage = async (req, res) => {
+
+// Function to upload face images
+export const uploadFaceImage = async (req, res) => {
   jwt.verify(req.query.token, secret, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: 'Invalid or expired token' });
@@ -196,20 +195,90 @@ const uploadFaceImage = async (req, res) => {
         return res.status(404).json({ message: 'Student not found' });
       }
 
-      // Use the correct field name here
-      upload.array('faceImages', 10)(req, res, async (err) => {
-        if (err) {
-          return res.status(500).json({ message: 'File upload failed', error: err.message });
+      if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).json({ message: 'No files were uploaded' });
+      }
+
+      const faceImages = req.files.faceImages;
+      const faceImageArray = Array.isArray(faceImages) ? faceImages : [faceImages];
+
+      const descriptors = [];
+
+      for (const file of faceImageArray) {
+        const imageBuffer = Buffer.from(file.data);
+
+        const img = await sharp(imageBuffer)
+          .resize({ width: 640, height: 480 }) // Resize if necessary
+          .toBuffer();
+
+        // Convert Buffer to Image
+        const imgCanvas = await loadImage(img);
+        const detection = await faceapi.detectSingleFace(imgCanvas)
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (detection) {
+          const descriptorArray = Array.from(detection.descriptor);
+          descriptors.push(descriptorArray);
         }
+      }
 
-        student.faceImage.push(...req.files.map(file => file.filename));
-        await student.save();
+      // Ensure the student's trainedModel is initialized as an array
+      if (!Array.isArray(student.trainedModel)) {
+        student.trainedModel = [];
+      }
 
-        res.json({ message: 'Face image uploaded successfully' });
-      });
+      // Add the new descriptors to the student's trained model
+      student.trainedModel.push(...descriptors);
+      await student.save();
+
+      res.json({ message: 'Face image uploaded and trained model saved!' });
     } catch (error) {
+      console.error('Server error:', error);
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   });
 };
-module.exports = { registerStudents, loginStudent,uploadFaceImage, generateLinksForAllStudents,getStudents };
+
+// Verify face
+export const verifyFace = async (req, res) => {
+  const { image } = req.body;
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    // Verify the JWT token to get student ID
+    const decoded = jwt.verify(token, secret);
+    const student = await Student.findById(decoded.user.id);
+
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    // Convert the base64 image to a Buffer
+    const imageBuffer = Buffer.from(image.split(',')[1], 'base64');
+    
+    // Process the image
+    const imgCanvas = await canvas.loadImage(imageBuffer);
+    const detection = await faceapi.detectSingleFace(imgCanvas).withFaceLandmarks().withFaceDescriptor();
+    
+    if (!detection) return res.status(400).json({ message: 'No face detected' });
+
+    // Convert stored descriptors to Float32Array
+    const descriptors = student.trainedModel.map(desc => new Float32Array(desc));
+
+    // Create a face matcher
+    const faceMatcher = new faceapi.FaceMatcher(
+      descriptors.map(desc => new faceapi.LabeledFaceDescriptors(student.matricNo, [desc]))
+    );
+    const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+
+    if (bestMatch.label === student.matricNo) {
+      res.json({ success: true, message: 'Face verified successfully!' });
+    } else {
+      res.status(401).json({ success: false, message: 'Face verification failed!' });
+    }
+  } catch (err) {
+    console.error('Face verification error:', err.message);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};

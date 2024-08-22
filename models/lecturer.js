@@ -1,6 +1,6 @@
 // models/lecturer.js
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 
 const courseSchema = new Schema({
   title: {
@@ -39,4 +39,4 @@ const lecturerSchema = new Schema({
 });
 
 const Lecturer = mongoose.model('Lecturer', lecturerSchema);
-module.exports = Lecturer;
+export default Lecturer;

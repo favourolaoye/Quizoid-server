@@ -1,7 +1,7 @@
-const Enrollment = require('../models/Enrollment');
+import Enrollment from '../models/Enrollment.js';
 
 // Enroll Student in Courses
-exports.enrollCourses = async (req, res) => {
+export const enrollCourses = async (req, res) => {
   try {
     const { studentId, selectedCourses } = req.body;
     const enrollments = selectedCourses.map(courseId => ({

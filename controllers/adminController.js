@@ -1,7 +1,9 @@
-const Admin = require('../models/Admin');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+import Admin from '../models/Admin.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const secret = process.env.SECRET_ID;
 
@@ -10,7 +12,7 @@ const sendErrorResponse = (res, statusCode, message) => {
   return res.status(statusCode).json({ message });
 };
 
-exports.registerAdmin = async (req, res) => {
+export const registerAdmin = async (req, res) => {
   const { adminID, name, password } = req.body;
 
   if (!adminID || !name || !password) {
@@ -43,8 +45,7 @@ exports.registerAdmin = async (req, res) => {
   }
 };
 
-
-exports.loginAdmin = async (req, res) => {
+export const loginAdmin = async (req, res) => {
   const { adminID, password } = req.body;
 
   if (!adminID || !password) {
@@ -55,31 +56,31 @@ exports.loginAdmin = async (req, res) => {
     let admin = await Admin.findOne({ adminID });
 
     if (!admin) {
-      return res.status(400).json({ message: 'Invalid username' });
+      return sendErrorResponse(res, 400, 'Invalid username');
     }
 
     // Hash user-defined password and compare with one in the DB
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid Password' });
+      return sendErrorResponse(res, 400, 'Invalid Password');
     }
 
     const payload = {
       id: admin._id,
       name: admin.name,
       role: 'admin',
-      details:{
+      details: {
         name: admin.name,
         adminID: admin.adminID,
-      }
+      },
     };
 
     jwt.sign(
       payload,
-      secret, { expiresIn: '1d' }, 
+      secret, { expiresIn: '1d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token, user:payload });
+        res.json({ token, user: payload });
       }
     );
   } catch (err) {
