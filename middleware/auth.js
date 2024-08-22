@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const secret = process.env.SECRET_ID; //
+const secret = process.env.SECRET_ID || "6c8b0f32-9d45-4f77-a19b-9e35a96bca8a"; //
 
 export default function (req, res, next) {
   const token = req.header('x-auth-token');

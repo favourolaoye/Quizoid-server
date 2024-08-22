@@ -12,7 +12,7 @@ const ObjectiveSchema = new Schema({
   instruction: { type: String, required: true },
   type: { type: String, required: true, enum: ['theory', 'multichoice'] },
   questions: [questionSchema],
-  lecturerID: { type: Schema.Types.ObjectId, ref: 'Lecturer', required: true },
+  lecturerID: { type: String, required: true }, // Change to String
   createdAt: { type: Date, default: Date.now }
 });
 

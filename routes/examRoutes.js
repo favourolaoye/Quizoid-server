@@ -17,7 +17,7 @@ router.get('/:id', auth, getExamById);
 router.put('/:id', auth, updateExam);
 
 // Delete exam
-router.delete('/:courseCode', auth, deleteExam);
+router.delete('/:type/:courseCode', auth, deleteExam);
 
 // Check exam existence
 router.get('/check/:courseCode', auth, checkExam);

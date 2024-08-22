@@ -71,21 +71,32 @@ export const updateExam = async (req, res) => {
 };
 
 export const deleteExam = async (req, res) => {
-  const { courseCode } = req.params;
+  const { courseCode, type } = req.params;
 
   try {
-    const exam = await ObjectiveExam.findOne({ courseCode });
+    // Determine the appropriate model based on the type
+    const ExamModel = {
+      theory: TheoryExam,
+      practical: PracticalExam
+    }[type] ?? null; 
+
+    if (!ExamModel) {
+      return res.status(400).json({ message: 'Invalid exam type' });
+    }
+
+    const exam = await ExamModel.findOne({ courseCode });
     if (exam) {
-      await ObjectiveExam.deleteOne({ courseCode });
-      res.status(200).json({ message: 'Exam deleted successfully' });
+      await ExamModel.deleteOne({ courseCode });
+      return res.status(200).json({ message: 'Exam deleted successfully' });
     } else {
       return res.status(404).json({ message: 'Exam not found' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error', error });
+    return res.status(500).json({ message: 'Server error', error });
   }
 };
+
 
 export const checkExam = async (req, res) => {
   const { courseCode } = req.params;
