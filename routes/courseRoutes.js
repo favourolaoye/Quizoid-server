@@ -1,12 +1,17 @@
 import express from 'express';
-import { uploadCourses, getCoursesForStudent } from '../controllers/courseController.js';
+import { getCoursesByDeptAndLevel, enrollStudentInCourse, uploadCourses,getEnrolledCourses } from '../controllers/courseController.js';
 
 const router = express.Router();
 
-// Admin: Upload Courses via CSV
+// Route to fetch courses based on department and level
+router.get('/courses', getCoursesByDeptAndLevel);
+
 router.post('/upload', uploadCourses);
 
-// Student: Get Courses by Department and Level
-router.get('/:studentId', getCoursesForStudent);
+// Route to enroll in a course
+router.post('/enroll', enrollStudentInCourse)
+
+//fetch ennrolled courses
+router.get('/:studentId/enrolled-courses', getEnrolledCourses);
 
 export default router;

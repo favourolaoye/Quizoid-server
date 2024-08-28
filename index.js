@@ -12,7 +12,9 @@ import studentRoutes from './routes/studentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import lecturerRoutes from './routes/lecturerRoutes.js';
 import examRoutes from './routes/examRoutes.js';
-import theoryRoutes from './routes/TheoryRoutes.js';
+import resultRoutes from './routes/resultRoutes.js';
+import theResultRoutes from './routes/theoryResultRoutes.js'
+// import theoryRoutes from './routes/TheoryRoutes.js';
 
 // Initialize Express app
 const app = express();
@@ -21,20 +23,30 @@ const app = express();
 connectDB();
 
 // Middleware Initialization
-app.use(express.json());
+
+// Increase the limit for JSON and URL-encoded payloads
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
 app.use(helmet());
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use(cors());
-app.use(fileUpload());
+
+// Set file upload limits if needed
+app.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+}));
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Define Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/lecturer', lecturerRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/mcq', examRoutes);
-app.use('/api/theory', theoryRoutes);
-app.use('/api/courses', courseRoutes);
+app.use('/api/info', courseRoutes);
+app.use('/api/submit', resultRoutes);  
 app.use('/api/enrollments', enrollmentRoutes);
+app.use('/api/answers', theResultRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 3000;

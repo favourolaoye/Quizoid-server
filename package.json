@@ -33,6 +33,7 @@
     "nodemailer": "^6.9.14",
     "nvm": "^0.0.4",
     "path": "^0.12.7",
+    "pdfkit": "^0.15.0",
     "sharp": "^0.33.4"
   },
   "devDependencies": {

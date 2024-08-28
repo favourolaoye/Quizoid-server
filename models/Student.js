@@ -7,7 +7,11 @@ const studentSchema = new mongoose.Schema({
   level: { type: String, required: true },
   password: { type: String, required: true },
   email: { type: String, required: true },
-  // Store face descriptors as an array of arrays of numbers
+  enrolledCourses: [
+    {
+      courseCode: { type: String, required: true } 
+    }
+  ],
   trainedModel: {
     type: [[Number]], 
     default: []

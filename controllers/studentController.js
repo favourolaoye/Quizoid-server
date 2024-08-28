@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-import Student from '../models/Student.js'; // Ensure model files use .js extension
+import Student from '../models/Student.js';
 import sharp from 'sharp';
 import * as faceapi from 'face-api.js';
 import { fileURLToPath } from 'url';

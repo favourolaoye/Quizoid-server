@@ -4,7 +4,8 @@ const { Schema } = mongoose;
 const questionSchema = new Schema({
   question: { type: String, required: true },
   options: [String],
-  correctOption: { type: String },
+  correctOption: { type: String, required: true },
+  score: { type: Number, required: true }, 
 });
 
 const ObjectiveSchema = new Schema({
@@ -12,7 +13,9 @@ const ObjectiveSchema = new Schema({
   instruction: { type: String, required: true },
   type: { type: String, required: true, enum: ['theory', 'multichoice'] },
   questions: [questionSchema],
-  lecturerID: { type: String, required: true }, // Change to String
+  lecturerID: { type: String, required: true },
+  status: { type: Boolean, required: true },
+  duration: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 
