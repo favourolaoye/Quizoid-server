@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import Lecturer from '../models/Lecturer.js';
+import Lecturer from '../models/lecturer.js';
 
 
 const secret = process.env.SECRET_ID;
