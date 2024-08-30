@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Lecturer from '../models/Lecturer.js';
 
+
 const secret = process.env.SECRET_ID;
 
 export const addLecturer = async (req, res) => {
